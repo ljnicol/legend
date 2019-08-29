@@ -1,7 +1,7 @@
 {
   "name": "legend",
   "version": "1.0.0",
-  "description": "Reusable legend for your visualisations.",
+  "description": "Reusable legends for your visualisations.",
   "repository": "git@github.com:ljnicol/legend.git",
   "author": "ljnicol <l.nicol.9@gmail.com>",
   "license": "MIT",

@@ -1,0 +1,19 @@
+{
+    "type": "package",
+    "name": "ljnicol/legend",
+    "summary": "Reusable legends for your visualisations.",
+    "license": "Apache-2.0",
+    "version": "0.0.1",
+    "exposed-modules": [
+        "Legend.Legend"
+    ],
+    "elm-version": "0.19.0 <= v < 0.20.0",
+    "dependencies": {
+        "avh4/elm-color": "1.0.0 <= v < 2.0.0",
+        "elm/core": "1.0.0 <= v < 2.0.0",
+        "elm/html": "1.0.0 <= v < 2.0.0"
+    },
+    "test-dependencies": {
+        "elm-explorations/test": "1.2.0 <= v < 2.0.0"
+    }
+}
