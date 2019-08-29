@@ -28,3 +28,4 @@ Idiomatic Guide to Releasing Elm:
 # Thanks
 
 Many thanks to Indicatrix (https://indicatrix.io) for supporting this project.
+Also thankyou to @newmana for providing much of the inspiration.
