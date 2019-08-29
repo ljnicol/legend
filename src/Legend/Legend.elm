@@ -1,15 +1,16 @@
 module Legend.Legend exposing (..)
 
-import Color exposing (Color, rgb255)
-import Html
-
+import Color
 
 type alias Bin a =
     { value : a
-    , colour : Color
+    , color : Color.Color
     }
 
+toBin : a -> Color.Color -> Bin a
+toBin v c =
+    {value = v, color = c}
 
-view : List (Bin a) -> (a -> String) -> Html.Html b
-view bins show =
-    Html.div [] (List.map (\bin -> Html.text <| show bin.value) bins)
+toBins : List a -> List Color.Color -> List (Bin a)
+toBins vs cs =
+    List.map2 toBin vs cs
