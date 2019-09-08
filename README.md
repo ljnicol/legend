@@ -13,8 +13,9 @@ Reusable legend for your visualisations.
 1. Scaling tweaks - use viewbox so width can be customised.
 2. Segmented legends
 3. Categorical legends
-3. Icon categorical legends (coloured icons instead of colour blocks)
 4. Vertical vs Horizontal legends
+4. Documentation
+3. Icon categorical legends (coloured icons instead of colour blocks)
 
 # Links
 
@@ -35,4 +36,4 @@ Idiomatic Guide to Releasing Elm:
 # Thanks
 
 Many thanks to Indicatrix (https://indicatrix.io) for supporting this project.
-Also thankyou to @newmana for providing much of the inspiration.
+Also thanks to @newmana for providing much of the inspiration and the excellent chroma-elm package (<https://package.elm-lang.org/packages/newmana/chroma-elm/latest/>).
