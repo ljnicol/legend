@@ -14,7 +14,7 @@ import Svg.Attributes as SvgAttributes
 
 defaultConfig : Int -> Legend.Config
 defaultConfig numberOfBins =
-    { numberOfStops = numberOfBins + 1
+    { numberOfStops = numberOfBins
     , numberOfTicks = numberOfBins
     , segmentWidth = 50
     , padding = 26
@@ -23,15 +23,15 @@ defaultConfig numberOfBins =
     , textTopPadding = 14
     , segmentHeight = 26
     , colorYTranslate = 4.0
-    , tickWidth = 1
+    , tickWidth = 2
     }
 
 
-view : List (Legend.Bin a) -> (a -> String) -> Html.Html msg
-view bins show =
+view : List (Legend.Bin a) -> Legend.Bin a -> a -> (a -> String) -> Html.Html msg
+view bins first last show =
     case Nonempty.fromList bins of
         Just nonEmptyBins ->
-            viewWithConfig nonEmptyBins show (defaultConfig <| List.length bins)
+            viewWithConfig nonEmptyBins first last show (defaultConfig <| List.length bins)
 
         Nothing ->
             Html.div [ HtmlAttributes.class "legend" ]
@@ -39,8 +39,8 @@ view bins show =
                 ]
 
 
-viewWithConfig : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Legend.Config -> Html.Html msg
-viewWithConfig bins show ({ segmentWidth, padding, numberOfStops, colorYTranslate, svgHeight, unitsYTranslate } as config) =
+viewWithConfig : Nonempty.Nonempty (Legend.Bin a) -> Legend.Bin a -> a -> (a -> String) -> Legend.Config -> Html.Html msg
+viewWithConfig bins first last show ({ segmentWidth, padding, numberOfStops, colorYTranslate, svgHeight, unitsYTranslate } as config) =
     let
         svgWidth =
             numberOfStops
@@ -54,9 +54,6 @@ viewWithConfig bins show ({ segmentWidth, padding, numberOfStops, colorYTranslat
 
         values =
             Nonempty.map (\b -> show b.value) bins
-
-        first =
-            3
     in
     Html.div [ HtmlAttributes.class "legend" ]
         [ Svg.svg
@@ -65,9 +62,9 @@ viewWithConfig bins show ({ segmentWidth, padding, numberOfStops, colorYTranslat
             , SvgAttributes.fill "white"
             ]
             [ Svg.g [ SvgAttributes.transform <| "translate(0, " ++ String.fromFloat colorYTranslate ++ ")" ]
-                (viewStopColor config -1 (Nonempty.head colors)
+                (viewStop config -1 (show first.value) (ChromaTypes.RGBAColor first.color)
                     :: Util.indexedMap2 (viewStop config) (Nonempty.toList values) (Nonempty.toList colors)
-                 --                    ++ [ viewStopLabel config (numberOfStops - 1)  ]
+                    ++ [ viewStopLabel config numberOfStops (show last) ]
                 )
             ]
         ]
@@ -84,7 +81,7 @@ viewStop config index value color =
 viewStopColor : Legend.Config -> Int -> ChromaTypes.ExtColor -> Svg.Svg msg
 viewStopColor { segmentWidth, segmentHeight, padding } index color =
     Svg.rect
-        [ SvgAttributes.x << String.fromInt <| ((index + 1) * segmentWidth + padding)
+        [ SvgAttributes.x << String.fromInt <| (index + 1) * segmentWidth + padding
         , SvgAttributes.y "0"
         , SvgAttributes.width <| String.fromInt segmentWidth
         , SvgAttributes.height <| String.fromInt segmentHeight

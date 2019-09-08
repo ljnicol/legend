@@ -10,6 +10,6 @@ import Legend.Segments as Segments
 main =
     let
         bins =
-            Legend.toBins [ 0, 1, 2 ] [ Color.red, Color.green, Color.blue ]
+            Legend.toBins [ 0, 1, 2, 3 ] [ Color.red, Color.green, Color.blue, Color.orange ]
     in
-    Html.div [] [ Continuous.view bins String.fromInt, Segments.view bins String.fromInt ]
+    Html.div [] [ Continuous.view bins String.fromInt, Segments.view bins { value = -1, color = Color.black } 4 String.fromInt ]
