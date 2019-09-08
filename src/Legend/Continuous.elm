@@ -1,4 +1,4 @@
-module Legend.Continuous exposing (view)
+module Legend.Continuous exposing (tickPosition, view)
 
 import Chroma.Chroma as Chroma
 import Chroma.Converter.Out.ToHex as ChromaToHex
@@ -11,22 +11,10 @@ import Svg
 import Svg.Attributes as SvgAttributes
 
 
-type alias Config =
-    { numberOfStops : Int
-    , segmentWidth : Int
-    , padding : Int
-    , svgHeight : Float
-    , unitsYTranslate : Float
-    , textTopPadding : Int
-    , segmentHeight : Int
-    , colorYTranslate : Float
-    , tickWidth : Int
-    }
-
-
-defaultConfig : Config
-defaultConfig =
+defaultConfig : Int -> Legend.Config
+defaultConfig numberOfBins =
     { numberOfStops = 102
+    , numberOfTicks = numberOfBins - 1
     , segmentWidth = 2
     , padding = 26
     , svgHeight = 46.0
@@ -34,33 +22,15 @@ defaultConfig =
     , textTopPadding = 14
     , segmentHeight = 24
     , colorYTranslate = 4.0
-    , tickWidth = 1
+    , tickWidth = 2
     }
 
 
 view : List (Legend.Bin a) -> (a -> String) -> Html.Html msg
 view bins show =
-    viewWithConfig bins show defaultConfig
-
-
-viewWithConfig : List (Legend.Bin a) -> (a -> String) -> Config -> Html.Html msg
-viewWithConfig bins show ({ numberOfStops, segmentWidth, padding, svgHeight } as config) =
-    let
-        -- 4 pixels wide * 102 -> 408
-        totalSvgWidth =
-            numberOfStops * segmentWidth + padding * 2
-    in
     case Nonempty.fromList bins of
         Just nonEmptyBins ->
-            Html.div [ HtmlAttributes.class "legend" ]
-                [ Svg.svg
-                    [ SvgAttributes.width <| String.fromInt totalSvgWidth
-                    , SvgAttributes.height <| String.fromFloat svgHeight
-                    , SvgAttributes.fill "white"
-                    ]
-                    [ viewBody nonEmptyBins show config
-                    ]
-                ]
+            viewWithConfig nonEmptyBins show (defaultConfig <| List.length bins)
 
         Nothing ->
             Html.div [ HtmlAttributes.class "legend" ]
@@ -68,7 +38,25 @@ viewWithConfig bins show ({ numberOfStops, segmentWidth, padding, svgHeight } as
                 ]
 
 
-viewBody : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Config -> Svg.Svg msg
+viewWithConfig : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Legend.Config -> Html.Html msg
+viewWithConfig bins show ({ numberOfStops, segmentWidth, padding, svgHeight } as config) =
+    Html.div [ HtmlAttributes.class "legend" ]
+        [ Svg.svg
+            [ SvgAttributes.width <| String.fromInt (totalSvgWidth numberOfStops segmentWidth padding)
+            , SvgAttributes.height <| String.fromFloat svgHeight
+            , SvgAttributes.fill "white"
+            ]
+            [ viewBody bins show config
+            ]
+        ]
+
+
+totalSvgWidth : Int -> Int -> Int -> Int
+totalSvgWidth numberOfStops segmentWidth padding =
+    numberOfStops * segmentWidth + padding * 2
+
+
+viewBody : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Legend.Config -> Svg.Svg msg
 viewBody bins show ({ colorYTranslate } as config) =
     let
         colours =
@@ -84,7 +72,7 @@ viewBody bins show ({ colorYTranslate } as config) =
         )
 
 
-viewColourBand : Nonempty.Nonempty ChromaTypes.ExtColor -> Config -> List (Svg.Svg msg)
+viewColourBand : Nonempty.Nonempty ChromaTypes.ExtColor -> Legend.Config -> List (Svg.Svg msg)
 viewColourBand colours ({ numberOfStops } as config) =
     let
         ( _, f ) =
@@ -94,15 +82,9 @@ viewColourBand colours ({ numberOfStops } as config) =
         :: List.map (\i -> viewStopColor f i config) (List.range 1 numberOfStops)
 
 
-viewTicks : Nonempty.Nonempty String -> Config -> List (Svg.Svg msg)
-viewTicks values ({ numberOfStops } as config) =
+viewTicks : Nonempty.Nonempty String -> Legend.Config -> List (Svg.Svg msg)
+viewTicks values ({ numberOfStops, numberOfTicks } as config) =
     let
-        numberOfTicks =
-            List.length ticks
-
-        tickPosition index =
-            toFloat numberOfStops * toFloat index / toFloat numberOfTicks
-
         reverseTicks =
             values |> Nonempty.reverse
 
@@ -112,11 +94,16 @@ viewTicks values ({ numberOfStops } as config) =
         max =
             reverseTicks |> Nonempty.head
     in
-    List.indexedMap (\index tick -> viewTick (tickPosition index) tick config) ticks
+    List.indexedMap (\index tick -> viewTick (tickPosition numberOfStops numberOfTicks index) tick config) ticks
         ++ [ viewLabel numberOfStops max config ]
 
 
-viewTick : Float -> String -> Config -> Svg.Svg msg
+tickPosition : Int -> Int -> Int -> Float
+tickPosition numberOfStops numberOfTicks index =
+    toFloat numberOfStops * toFloat index / toFloat numberOfTicks
+
+
+viewTick : Float -> String -> Legend.Config -> Svg.Svg msg
 viewTick position label ({ segmentWidth, segmentHeight, tickWidth, padding } as config) =
     Svg.g []
         [ Svg.rect
@@ -132,7 +119,7 @@ viewTick position label ({ segmentWidth, segmentHeight, tickWidth, padding } as 
         ]
 
 
-viewStopColor : (Float -> ChromaTypes.ExtColor) -> Int -> Config -> Svg.Svg msg
+viewStopColor : (Float -> ChromaTypes.ExtColor) -> Int -> Legend.Config -> Svg.Svg msg
 viewStopColor f index { segmentWidth, segmentHeight, tickWidth, padding } =
     Svg.rect
         [ SvgAttributes.x << String.fromInt <| ((index + 1) * segmentWidth + padding)
@@ -144,7 +131,7 @@ viewStopColor f index { segmentWidth, segmentHeight, tickWidth, padding } =
         []
 
 
-viewLabel : Int -> String -> Config -> Svg.Svg msg
+viewLabel : Int -> String -> Legend.Config -> Svg.Svg msg
 viewLabel index label { segmentWidth, segmentHeight, tickWidth, padding, textTopPadding } =
     Svg.text_
         [ SvgAttributes.x << String.fromInt <| (index + 1) * segmentWidth + padding
@@ -153,14 +140,3 @@ viewLabel index label { segmentWidth, segmentHeight, tickWidth, padding, textTop
         , SvgAttributes.fill "black"
         ]
         [ Svg.text label ]
-
-
-viewTextElement : String -> Float -> Svg.Svg msg
-viewTextElement string y =
-    Svg.text_
-        [ SvgAttributes.x "50%"
-        , SvgAttributes.y <| String.fromFloat y
-        , SvgAttributes.textAnchor "middle"
-        , SvgAttributes.fill "black"
-        ]
-        [ Svg.text string ]

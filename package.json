@@ -15,5 +15,7 @@
     "elm-hot": "^1.1.0"
   },
   "resolutions": {},
-  "scripts": {}
+  "scripts": {
+    "local-doc": "yarn run parcel examples/index.html"
+  }
 }
