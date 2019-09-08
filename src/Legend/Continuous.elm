@@ -13,7 +13,7 @@ import Svg.Attributes as SvgAttributes
 
 defaultConfig : Int -> Legend.Config
 defaultConfig numberOfBins =
-    { numberOfStops = 102
+    { numberOfStops = 100
     , numberOfTicks = numberOfBins - 1
     , segmentWidth = 2
     , padding = 26
@@ -22,7 +22,7 @@ defaultConfig numberOfBins =
     , textTopPadding = 14
     , segmentHeight = 24
     , colorYTranslate = 4.0
-    , tickWidth = 2
+    , tickWidth = 1
     }
 
 
@@ -75,11 +75,14 @@ viewBody bins show ({ colorYTranslate } as config) =
 viewColourBand : Nonempty.Nonempty ChromaTypes.ExtColor -> Legend.Config -> List (Svg.Svg msg)
 viewColourBand colours ({ numberOfStops } as config) =
     let
+        chromaDomain =
+            numberOfStops - 1
+
         ( _, f ) =
-            Chroma.domain (Nonempty.Nonempty 0 [ toFloat numberOfStops ]) colours
+            Chroma.domain (Nonempty.Nonempty 0 [ toFloat chromaDomain ]) colours
     in
     viewStopColor f 0 config
-        :: List.map (\i -> viewStopColor f i config) (List.range 1 numberOfStops)
+        :: List.map (\i -> viewStopColor f i config) (List.range 1 chromaDomain)
 
 
 viewTicks : Nonempty.Nonempty String -> Legend.Config -> List (Svg.Svg msg)
@@ -89,7 +92,7 @@ viewTicks values ({ numberOfStops, numberOfTicks } as config) =
             values |> Nonempty.reverse
 
         ticks =
-            reverseTicks |> Nonempty.tail |> List.reverse
+            reverseTicks |> Nonempty.toList |> List.reverse
 
         max =
             reverseTicks |> Nonempty.head
