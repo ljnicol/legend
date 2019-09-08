@@ -6,8 +6,15 @@ Reusable legend for your visualisations.
 - ```yarn run elm make```
 - ```yarn run elm-test```
 
-## Documentation
-- ```yarn run parcel examples/index.html```
+## Examples
+```yarn run local-doc```
+
+# Roadmap
+1. Scaling tweaks - use viewbox so width can be customised.
+2. Segmented legends
+3. Categorical legends
+3. Icon categorical legends (coloured icons instead of colour blocks)
+4. Vertical vs Horizontal legends
 
 # Links
 
