@@ -36,4 +36,4 @@ Idiomatic Guide to Releasing Elm:
 # Thanks
 
 Many thanks to Indicatrix (https://indicatrix.io) for supporting this project.
-Also thanks to @newmana for providing much of the inspiration and the excellent chroma-elm package (<https://package.elm-lang.org/packages/newmana/chroma-elm/latest/>).
+Also thanks to [newmana](https:github.com/newmana) for providing much of the inspiration and the excellent chroma-elm package (<https://package.elm-lang.org/packages/newmana/chroma-elm/latest/>).
