@@ -21,7 +21,7 @@ defaultConfig numberOfBins =
     , svgHeight = 46.0
     , unitsYTranslate = 34.0
     , textTopPadding = 14
-    , segmentHeight = 2
+    , segmentHeight = 26
     , colorYTranslate = 4.0
     , tickWidth = 1
     }
