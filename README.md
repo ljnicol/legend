@@ -10,7 +10,6 @@ Reusable legend for your visualisations.
 ```yarn run local-doc```
 
 # Roadmap
-1. Scaling tweaks - use viewbox so width can be customised.
 2. Segmented legends
 3. Categorical legends
 4. Vertical vs Horizontal legends
