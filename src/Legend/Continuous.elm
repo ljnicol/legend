@@ -17,12 +17,13 @@ defaultConfig numberOfBins =
     , numberOfTicks = numberOfBins - 1
     , segmentWidth = 2
     , padding = 26
-    , svgHeight = 46.0
+    , svgHeight = 50
     , unitsYTranslate = 34.0
     , textTopPadding = 14
     , segmentHeight = 24
     , colorYTranslate = 4.0
     , tickWidth = 1
+    , direction = Legend.Vertical
     }
 
 
@@ -39,11 +40,15 @@ view bins show =
 
 
 viewWithConfig : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Legend.Config -> Html.Html msg
-viewWithConfig bins show ({ numberOfStops, segmentWidth, padding, svgHeight } as config) =
+viewWithConfig bins show config =
+    let
+        directionalSetup =
+            Legend.directionSetupView config
+    in
     Html.div [ HtmlAttributes.class "legend" ]
         [ Svg.svg
-            [ SvgAttributes.width <| String.fromInt (totalSvgWidth numberOfStops segmentWidth padding)
-            , SvgAttributes.height <| String.fromFloat svgHeight
+            [ SvgAttributes.width directionalSetup.width
+            , SvgAttributes.height directionalSetup.height
             , SvgAttributes.fill "white"
             ]
             [ viewBody bins show config
@@ -51,15 +56,10 @@ viewWithConfig bins show ({ numberOfStops, segmentWidth, padding, svgHeight } as
         ]
 
 
-totalSvgWidth : Int -> Int -> Int -> Int
-totalSvgWidth numberOfStops segmentWidth padding =
-    numberOfStops * segmentWidth + padding * 2
-
-
 viewBody : Nonempty.Nonempty (Legend.Bin a) -> (a -> String) -> Legend.Config -> Svg.Svg msg
 viewBody bins show ({ colorYTranslate } as config) =
     let
-        colours =
+        colors =
             Nonempty.map (\b -> ChromaTypes.RGBAColor b.color) bins
 
         values =
@@ -67,7 +67,7 @@ viewBody bins show ({ colorYTranslate } as config) =
     in
     Svg.g
         [ SvgAttributes.transform <| "translate(0, " ++ String.fromFloat colorYTranslate ++ ")" ]
-        (viewColourBand colours config
+        (viewColourBand colors config
             ++ viewTicks values config
         )
 
@@ -107,14 +107,17 @@ tickPosition numberOfStops numberOfTicks index =
 
 
 viewTick : Float -> String -> Legend.Config -> Svg.Svg msg
-viewTick position label ({ segmentWidth, segmentHeight, tickWidth, padding } as config) =
+viewTick position label ({ segmentWidth, segmentHeight, tickWidth, padding, direction } as config) =
+    let
+        directionalSetup =
+            Legend.directionSetupTicks position config
+    in
     Svg.g []
         [ Svg.rect
-            [ (SvgAttributes.x << String.fromFloat) <|
-                ((position + 1) * toFloat segmentWidth + toFloat padding)
-            , SvgAttributes.y "0"
-            , SvgAttributes.width <| String.fromInt tickWidth
-            , SvgAttributes.height <| String.fromInt segmentHeight
+            [ SvgAttributes.x directionalSetup.x
+            , SvgAttributes.y directionalSetup.y
+            , SvgAttributes.width directionalSetup.width
+            , SvgAttributes.height directionalSetup.height
             , SvgAttributes.fill "white"
             ]
             []
@@ -123,22 +126,30 @@ viewTick position label ({ segmentWidth, segmentHeight, tickWidth, padding } as 
 
 
 viewStopColor : (Float -> ChromaTypes.ExtColor) -> Int -> Legend.Config -> Svg.Svg msg
-viewStopColor f index { segmentWidth, segmentHeight, tickWidth, padding } =
+viewStopColor f index config =
+    let
+        directionalSetup =
+            Legend.directionSetupColor index config
+    in
     Svg.rect
-        [ SvgAttributes.x << String.fromInt <| ((index + 1) * segmentWidth + padding)
-        , SvgAttributes.y "0"
-        , SvgAttributes.width <| String.fromInt segmentWidth
-        , SvgAttributes.height <| String.fromInt segmentHeight
+        [ SvgAttributes.x directionalSetup.x
+        , SvgAttributes.y directionalSetup.y
+        , SvgAttributes.width directionalSetup.width
+        , SvgAttributes.height directionalSetup.height
         , SvgAttributes.fill (f (toFloat index) |> ChromaToHex.toHex)
         ]
         []
 
 
 viewLabel : Int -> String -> Legend.Config -> Svg.Svg msg
-viewLabel index label { segmentWidth, segmentHeight, tickWidth, padding, textTopPadding } =
+viewLabel index label config =
+    let
+        directionalSetup =
+            Legend.directionSetupLabel index config
+    in
     Svg.text_
-        [ SvgAttributes.x << String.fromInt <| (index + 1) * segmentWidth + padding
-        , SvgAttributes.y << String.fromInt <| segmentHeight + textTopPadding
+        [ SvgAttributes.x directionalSetup.x
+        , SvgAttributes.y directionalSetup.y
         , SvgAttributes.textAnchor "middle"
         , SvgAttributes.fill "black"
         ]
