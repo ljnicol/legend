@@ -10,9 +10,9 @@ Reusable legend for your visualisations.
 ```yarn run local-doc```
 
 # Roadmap
-2. Segmented legends
+1. ~~Segmented legends~~
 3. Categorical legends
-4. Vertical vs Horizontal legends
+4. ~~Vertical vs Horizontal legends~~
 4. Documentation
 3. Icon categorical legends (coloured icons instead of colour blocks)
 
